@@ -16,7 +16,8 @@ class Cmd
     @name = name
     
     #@@cmd_info
-    
+    @out_end = ""
+    @err_end = ""
     @pid = nil
     @inp = ""
     @out = ""
@@ -63,6 +64,8 @@ public
           print "\nblksiz out_st: ", out_st.blksize, "\n" 
           Thread.current["out"] += @out.read_nonblock out_st.blksize 
           Thread.current["err"] += @err.read_nonblock err_st.blksize 
+          @out_end += @out.read
+          @err_end += @err.read
           #Thread.stop
         end
         
@@ -84,9 +87,10 @@ public
   def out
     begin
       @thread.run    
-      @thread["out"]
+      @out_end += @thread["out"]
     rescue ThreadError
       "empty"
+      @out_end
     end
   end
   
@@ -96,6 +100,7 @@ public
       @thread["err"]
     rescue ThreadError
       "empty"
+      @err_end
     end
   end
   
