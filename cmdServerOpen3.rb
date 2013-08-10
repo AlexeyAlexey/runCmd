@@ -215,9 +215,11 @@ loop do
   #print "Gets: cmd: ", cmd, "; arg: ", arg;
   case cmd
     when "on"
-      vpn.cmdStart      
+      vpn.cmdStart
+      client.puts "Thinking"
     when "off"
-      vpn.cmdStop      
+      vpn.cmdStop
+      client.puts "Thinking"
     when "err"
       client.puts vpn.err
     when "out"
@@ -231,6 +233,6 @@ loop do
   end
   #print "Vpn.vpnStatus: ", Vpn.vpnStatus
   
-  client.puts "endResponse"
+  #client.puts "endResponse"
   client.close  
 end
