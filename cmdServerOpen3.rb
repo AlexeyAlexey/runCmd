@@ -201,7 +201,7 @@ public
 end
 
 
-vpn = Cmd.new(:vpn, "sudo redcar")
+vpn = Cmd.new(:vpn, "sudo openvpn --config /home/ubuntu/keys/client.conf")
 
 
 
