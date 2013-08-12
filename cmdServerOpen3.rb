@@ -177,11 +177,11 @@ public
     @group_pid.clear
     #@thread["out"] = ""
     #print "\n176: After kill @thread.status = ", @thread.status, "\n"
-    @out.close
-    @err.close
     @thread.run
     @out_end = @thread["out"]
-    @err_end = @thread["err"]   
+    @err_end = @thread["err"]
+    @out.close
+    @err.close       
     
     Process.kill("INT", @pid)
     
