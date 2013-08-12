@@ -57,7 +57,7 @@ public
   
   def cmdStart() 
     
-    (return nill) unless @pid.nil?
+    (return nil) unless @pid.nil?
     @inp, @out, @err, wait_thr = Open3.popen3(@cmd)
     @inp.close
     print "\nsinc out: ", @out.sync, ";\n"
