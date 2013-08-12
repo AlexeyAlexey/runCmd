@@ -177,6 +177,7 @@ public
     @group_pid.clear
     #@thread["out"] = ""
     #print "\n176: After kill @thread.status = ", @thread.status, "\n"
+    print "\n180 Befor @thread.run; @thread.status = ", @thread.status, "\n"
     @thread.run
     @out_end = @thread["out"]
     @err_end = @thread["err"]
