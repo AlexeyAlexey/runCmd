@@ -27,8 +27,8 @@ class Cmd
     @name = name
     
     #@@cmd_info
-    @out_end = ""
-    @err_end = ""
+    @out_end = nil
+    @err_end = nil
     @pid = nil
     @inp = ""
     @out = ""
@@ -40,7 +40,7 @@ class Cmd
 private  
   def group_pid()
     ppid = @pid
-    
+    @group_pid.clear
     @group_pid << @pid
     print "\n def group_pid() @pid = ", @pid,"\n"
     ProcTable.ps do |process|  
@@ -48,6 +48,7 @@ private
       (ppid = process.pid; @group_pid << ppid) if process.ppid == ppid
     end
     
+    print "51: def group_pid()  @group_pid = #{@group_pid}"
     @group_pid
   end
   
@@ -67,24 +68,24 @@ public
     @thread = Thread.new do      
       begin
         
-        while !(@out.eof?)
-          Thread.current["out"] = "" if Thread.current["out"].nil?
-          Thread.current["err"] = "" if Thread.current["err"].nil?
+        loop do
+          Thread.current["out"] ||= "" 
+          Thread.current["err"] ||= ""
           out_st = @out.stat
           err_st = @err.stat
           print "\nblksiz out_st: ", out_st.blksize, "\n" 
           Thread.current["out"] += @out.read_nonblock out_st.blksize 
           Thread.current["err"] += @err.read_nonblock err_st.blksize 
-          @out_end += @out.read
-          @err_end += @err.read
-          #Thread.stop
+          print "\nThread befor Thread.stop\n"
+          Thread.stop
+          print "\nTrhead end\n"
         end
         
       rescue IO::WaitReadable
         IO.select [@out]
         retry
       rescue EOFError
-        Thread.current["out"] = "\nEOFError\n"
+        Thread.current["out"] = "\nEOFError\n"      
       end
     end
     
@@ -96,34 +97,31 @@ public
   end
   
   def out
-    begin
-      @thread.run    
-      @out_end += @thread["out"]
+    begin       
+      @out.closed? ? @out_end : (@thread.run; @thread["out"])      
     rescue ThreadError
-      "empty"
-      @out_end
+      "@out error"      
     end
   end
   
   def err
     begin
-      @thread.run
-      @thread["err"]
+      @err.closed? ? @err_end : (@thread.run; @thread["err"]) 
     rescue ThreadError
-      "empty"
-      @err_end
+      "@err error"      
     end
   end
   
   def cmdStatus()
     #http://manpages.ubuntu.com/manpages/lucid/man1/ps.1.html
     #PROCESS STATE CODES
-    print "\ndef cmdStatus() @group_pid = ", @group_pid, ";\n" 
-    group_pid if @group_pid.empty?
+    print "\n118: def cmdStatus() @group_pid = ", @group_pid, ";\n" 
+    group_pid if @group_pid[0].nil?
+    print "\n120: def cmdStatus() @group_pid = ", @group_pid, ";\n" 
     status = "true"
     status = "false" if @group_pid[0].nil?
     
-    print "\ncmdStatus @group_pid = ", @group_pid, "\n"
+    print "\n126: cmdStatus @group_pid = ", @group_pid, "\n"
     #state = Hash.new #pid and their state 
     
     @cmd_status.clear
@@ -157,23 +155,39 @@ public
   end
   
   
-  def cmdStop() 
+  def cmdStop()  
     
-    @out.close
-    @err.close
-       
+    
+    print "\n183: @pid = #{@pid}\n"
+    
+    print "\n161: Before kill @thread.status = ", @thread.status, "\n"   
     puts group_pid ##creat group of PID @@group_pid
     group_pid.reverse_each do |pid|
       begin
-        Process.kill("KILL", pid)
+        break if pid == @pid
+        print "\n165: group_pid.each do |#{pid}|\n"
+        print "\n166: Input kill @thread.status = ", @thread.status, "\n"
+        Process.kill("INT", pid)
       rescue Errno::ESRCH
         print "\npid there is not #{pid}\n"
       end
     end
     
-    @pid = nil
+    
     @group_pid.clear
     #@thread["out"] = ""
+    #print "\n176: After kill @thread.status = ", @thread.status, "\n"
+    @out.close
+    @err.close
+    @thread.run
+    @out_end = @thread["out"]
+    @err_end = @thread["err"]   
+    
+    Process.kill("INT", @pid)
+    
+    
+    @pid = nil
+    
   end
 
   
