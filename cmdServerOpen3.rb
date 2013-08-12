@@ -160,15 +160,15 @@ public
   def cmdStop()  
     
     
-    print "\n183: @pid = #{@pid}\n"
+    print "\n163: @pid = #{@pid}\n"
     
     print "\n161: Before kill @thread.status = ", @thread.status, "\n"   
     puts group_pid ##creat group of PID @@group_pid
     group_pid.reverse_each do |pid|
       begin
         break if pid == @pid
-        print "\n165: group_pid.each do |#{pid}|\n"
-        print "\n166: Input kill @thread.status = ", @thread.status, "\n"
+        print "\n170: group_pid.each do |#{pid}|\n"
+        print "\n171: Input kill @thread.status = ", @thread.status, "\n"
         Process.kill("INT", pid)
       rescue Errno::ESRCH
         print "\npid there is not #{pid}\n"
@@ -185,7 +185,7 @@ public
     @err_end = @thread["err"]
     @out.close
     @err.close       
-    
+    print "\npid #{pid}\n"
     Process.kill("INT", @pid)
     
     
