@@ -62,13 +62,15 @@ public
     print "\nsinc out: ", @out.sync, ";\n"
     @out.sync = true
     print "\nsinc out: ", @out.sync, ";\n"
-    @pid = wait_thr[:pid].clone #pid process 
+    @pid = wait_thr[:pid] #pid process 
     print "\nPID: ", @pid, ";\n"
       
     @thread = Thread.new do      
       begin
         
         loop do
+          print "\n loop Thread befor Thread.stop\n"
+          Thread.stop
           Thread.current["out"] ||= "" 
           Thread.current["err"] ||= ""
           out_st = @out.stat
