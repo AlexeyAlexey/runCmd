@@ -169,7 +169,7 @@ public
         break if pid == @pid
         print "\n170: group_pid.each do |#{pid}|\n"
         print "\n171: Input kill @thread.status = ", @thread.status, "\n"
-        Process.kill("HUP", pid)
+        Process.kill("KILL", pid)
       rescue Errno::ESRCH
         print "\npid there is not #{pid}\n"
       end
