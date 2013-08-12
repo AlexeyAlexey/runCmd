@@ -73,11 +73,11 @@ public
           Thread.current["err"] ||= ""
           out_st = @out.stat
           err_st = @err.stat
-          print "\nblksiz out_st: ", out_st.blksize, "\n" 
+          #print "\nblksiz out_st: ", out_st.blksize, "\n" 
           Thread.current["out"] += @out.read_nonblock out_st.blksize 
           Thread.current["err"] += @err.read_nonblock err_st.blksize 
           print "\nThread befor Thread.stop\n"
-          Thread.stop
+          #Thread.stop
           print "\nTrhead end\n"
         end
         
