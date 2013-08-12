@@ -186,8 +186,12 @@ public
     @out.close
     @err.close       
     print "\npid #{@pid}\n"
-    Process.kill("KILL", @pid)
     
+    begin
+      Process.kill("KILL", @pid)
+    rescue Errno::ESRCH
+      @pid = nil
+    end
     
     @pid = nil
     
