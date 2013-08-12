@@ -23,19 +23,18 @@ class Cmd
              "l" => "; is multi-threaded (using CLONE_THREAD, like NPTL pthreads do)",
              "+" => "; is in the foreground process group"}
   def initialize(name, cmd)
-    @cmd = cmd
-    @name = name
     
-    #@@cmd_info
-    @out_end = nil
-    @err_end = nil
-    @pid = nil
-    @inp = ""
-    @out = ""
-    @err = ""
-    @name = ""
-    @cmd_status = Hash.new
-    @group_pid = Array.new
+      @cmd = cmd; @name = name; @out_end = nil;
+      @err_end = nil
+      @pid = nil
+      @inp = ""
+      @out = ""
+      @err = ""
+      @name = ""
+      @cmd_status = Hash.new
+      @group_pid = Array.new
+      #@@cmd_info
+    
   end
 private  
   def group_pid()
@@ -57,6 +56,8 @@ private
 public
   
   def cmdStart() 
+    
+    (return nill) unless @pid.nil?
     @inp, @out, @err, wait_thr = Open3.popen3(@cmd)
     @inp.close
     print "\nsinc out: ", @out.sync, ";\n"
