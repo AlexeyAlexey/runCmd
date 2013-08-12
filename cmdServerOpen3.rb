@@ -186,7 +186,7 @@ public
     @out.close
     @err.close       
     print "\npid #{@pid}\n"
-    Process.kill("HUP", @pid)
+    Process.kill("KILL", @pid)
     
     
     @pid = nil
