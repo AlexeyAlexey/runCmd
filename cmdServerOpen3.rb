@@ -10,7 +10,18 @@ include Sys
 class Cmd
   
   @@cmd_info = Hash.new
-  
+  @@state_decod = {"D" => "Uninterruptible sleep (usually IO)", 
+             "R" => "Running or runnable (on run queue)",
+             "S" => "Interruptible sleep (waiting for an event to complete)",
+             "T" => "Stopped, either by a job control signal or because it is being traced.", 
+             "W" =>"paging (not valid since the 2.6.xx kernel)", "X" => "dead (should never be seen)",
+             "Z" => "Defunct (zombie) process, terminated but not reaped by its parent.",
+             "<" => "; high-priority (not nice to other users)",
+             "N" => "; low-priority (nice to other users)",
+             "L" => "; has pages locked into memory (for real-time and custom IO)",
+             "s" => "; is a session leader",
+             "l" => "; is multi-threaded (using CLONE_THREAD, like NPTL pthreads do)",
+             "+" => "; is in the foreground process group"}
   def initialize(name, cmd)
     @cmd = cmd
     @name = name
@@ -23,7 +34,7 @@ class Cmd
     @out = ""
     @err = ""
     @name = ""
-    @cmd_status = ""
+    @cmd_status = Hash.new
     @group_pid = Array.new
   end
 private  
@@ -111,67 +122,33 @@ public
     group_pid if @group_pid.empty?
     
     print "\ncmdStatus @group_pid = ", @group_pid, "\n"
-    status = ""
-    state = Hash.new 
-    @cmd_status = Hash.new
+    #state = Hash.new #pid and their state 
+    
     
     print "\n@group_pid = ", @group_pid, "\n"
     @group_pid.each do |pid|
       print "\n@group_pid.each |#{pid}|; \n"
       ProcTable.ps do |process|  
-        (state[pid] = process.state; print "\n state #{process.state}; \n") if process.pid ==  pid        
+        (@cmd_status[pid] = process.state; print "\n state #{process.state}; \n") if process.pid ==  pid        
       end
     end
-    print "\nstate = ", state, "\n"
-    state.each do |pid, st|
+    print "\n@cmd_status = ", @cmd_status, "\n"
+    @cmd_status.each do |pid, st|
       print "\nstate.each do |#{pid}, #{st}|\n"
-      st.each_char do |char|
-        print "\nst.each_char do |#{char}|\n"
-        case char
-          when "D"
-            @cmd_status[pid] = "Uninterruptible sleep (usually IO)"
-            status = "true"
-            print "\nD\n"
-          when "R"
-            @cmd_status[pid] = "Running or runnable (on run queue)"
-            status = "true"
-            print "\nR\n"
-          when "S"
-            print "\nPID = ", pid, ";\n"
-            @cmd_status[pid] = "Interruptible sleep (waiting for an event to complete)"
-            status = "true"
-            print "\nS\n"
-          when "T"
-            @cmd_status[pid] = "Stopped, either by a job control signal or because it is being traced."
-            status = "true"
-            print "\nT\n"
-          when "W"
-            @cmd_status[pid] = "paging (not valid since the 2.6.xx kernel)"
-            status = "true"
-          when "X"
-            @cmd_status[pid] = "dead (should never be seen)"
-            status = "false"
-          when "Z"
-            @cmd_status[pid] = " Defunct (zombie) process, terminated but not reaped by its parent."
-            status = "false"
-          when "<"
-            @cmd_status[pid] += "; high-priority (not nice to other users)"
-          when "N"
-            @cmd_status[pid] += "; low-priority (nice to other users)"
-          when "L"
-            @cmd_status[pid] += "; has pages locked into memory (for real-time and custom IO)"
-          when "s"
-            @cmd_status[pid] += "; is a session leader"
-          when "l"
-            @cmd_status[pid] += "; is multi-threaded (using CLONE_THREAD, like NPTL pthreads do)"
-          when "+"
-            @cmd_status[pid] += "; is in the foreground process group"
-          
-          else
-          
+      
+      st.each_char do |st_char|
+        @@state_decod.each_pair do |key, value|
+          if st_char == key
+            @cmd_status[pid] += "\n#{st_char}: #{value}"
+            (status = "false") if (key == "X" or key == "X")
+            break
+          end    
         end
       end
+      
+      
     end
+    print "\n def cmdStatus() @cmd_status: ", @cmd_status, "\n"
     @cmd_status
     status ||= "false"
   end
@@ -201,7 +178,7 @@ public
 end
 
 
-vpn = Cmd.new(:vpn, "sudo openvpn --config /home/ubuntu/keys/client.conf")
+vpn = Cmd.new(:vpn, "sudo redcar")
 
 
 
