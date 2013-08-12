@@ -62,7 +62,7 @@ public
     print "\nsinc out: ", @out.sync, ";\n"
     @out.sync = true
     print "\nsinc out: ", @out.sync, ";\n"
-    @pid = wait_thr[:pid] #pid process 
+    @pid = wait_thr[:pid].clone #pid process 
     print "\nPID: ", @pid, ";\n"
       
     @thread = Thread.new do      
@@ -77,7 +77,7 @@ public
           Thread.current["out"] += @out.read_nonblock out_st.blksize 
           Thread.current["err"] += @err.read_nonblock err_st.blksize 
           print "\nThread befor Thread.stop\n"
-          #Thread.stop
+          Thread.stop
           print "\nTrhead end\n"
         end
         
