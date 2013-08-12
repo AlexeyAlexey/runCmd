@@ -185,7 +185,7 @@ public
     @err_end = @thread["err"]
     @out.close
     @err.close       
-    print "\npid #{pid}\n"
+    print "\npid #{@pid}\n"
     Process.kill("INT", @pid)
     
     
