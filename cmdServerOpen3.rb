@@ -120,11 +120,13 @@ public
     #PROCESS STATE CODES
     print "\ndef cmdStatus() @group_pid = ", @group_pid, ";\n" 
     group_pid if @group_pid.empty?
+    status = "true"
+    status = "false" if @group_pid[0].nil?
     
     print "\ncmdStatus @group_pid = ", @group_pid, "\n"
     #state = Hash.new #pid and their state 
     
-    
+    @cmd_status.clear
     print "\n@group_pid = ", @group_pid, "\n"
     @group_pid.each do |pid|
       print "\n@group_pid.each |#{pid}|; \n"
@@ -132,15 +134,16 @@ public
         (@cmd_status[pid] = process.state; print "\n state #{process.state}; \n") if process.pid ==  pid        
       end
     end
+    
     print "\n@cmd_status = ", @cmd_status, "\n"
     @cmd_status.each do |pid, st|
-      print "\nstate.each do |#{pid}, #{st}|\n"
+      print "\n@cmd_status.each do |#{pid}, #{st}|\n"
       
       st.each_char do |st_char|
         @@state_decod.each_pair do |key, value|
           if st_char == key
-            @cmd_status[pid] += "\n#{st_char}: #{value}"
-            (status = "false") if (key == "X" or key == "X")
+            @cmd_status[pid] += "\n#{st_char}: #{value}"            
+            (status = "false") if (st_char == "X" or st_char == "Z")
             break
           end    
         end
