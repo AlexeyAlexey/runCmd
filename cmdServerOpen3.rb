@@ -29,7 +29,9 @@ class Cmd
       @pid = nil
       @inp = ""
       @out = ""
+      @out_end = ""
       @err = ""
+      @err_end = ""
       @name = ""
       @cmd_status = Hash.new
       @group_pid = Array.new
@@ -65,23 +67,25 @@ public
     print "\nsinc out: ", @out.sync, ";\n"
     @pid = wait_thr[:pid] #pid process 
     print "\nPID: ", @pid, ";\n"
+    
+    #@thread_io = Thread.new do 
+    #  @out_end = @out.read
+    #  @out_end = @err.read
+    #end
       
-    @thread = Thread.new do      
+    @thread = Thread.new do 
+      
       begin
         
-        loop do
-          print "\n loop Thread befor Thread.stop\n"
-          Thread.stop
+        while !(@out.eof?)
+          
           Thread.current["out"] ||= "" 
           Thread.current["err"] ||= ""
           out_st = @out.stat
           err_st = @err.stat
-          #print "\nblksiz out_st: ", out_st.blksize, "\n" 
           Thread.current["out"] += @out.read_nonblock out_st.blksize 
           Thread.current["err"] += @err.read_nonblock err_st.blksize 
-          print "\nThread befor Thread.stop\n"
-          Thread.stop
-          print "\nTrhead end\n"
+          
         end
         
       rescue IO::WaitReadable
@@ -100,8 +104,9 @@ public
   end
   
   def out
-    begin       
-      @out.closed? ? @out_end : (@thread.run; @thread["out"])      
+    begin
+      print "\ndef out @out.closed? #{@out.closed?}; @out_end = #{@out_end};\n"
+      @out.closed? ? (@out_end) : (@thread.run; @thread["out"])      
     rescue ThreadError
       "@out error"      
     end
@@ -109,7 +114,7 @@ public
   
   def err
     begin
-      @err.closed? ? @err_end : (@thread.run; @thread["err"]) 
+      @err.closed? ? (@err_end) : (@thread.run; @thread["err"]) 
     rescue ThreadError
       "@err error"      
     end
@@ -159,17 +164,14 @@ public
   
   
   def cmdStop()  
+    @thread.run
+    @out_end = @thread["out"]
+    @err_end = @thread["err"]
+    @out.close
+    @err.close  
     
-    
-    print "\n163: @pid = #{@pid}\n"
-    
-    print "\n161: Before kill @thread.status = ", @thread.status, "\n"   
-    puts group_pid ##creat group of PID @@group_pid
     group_pid.reverse_each do |pid|
       begin
-        break if pid == @pid
-        print "\n170: group_pid.each do |#{pid}|\n"
-        print "\n171: Input kill @thread.status = ", @thread.status, "\n"
         Process.kill("KILL", pid)
       rescue Errno::ESRCH
         print "\npid there is not #{pid}\n"
@@ -178,22 +180,6 @@ public
     
     
     @group_pid.clear
-    #@thread["out"] = ""
-    #print "\n176: After kill @thread.status = ", @thread.status, "\n"
-    print "\n180 Befor @thread.run; @thread.status = ", @thread.status, "\n"
-    @thread.run
-    @out_end = @thread["out"]
-    @err_end = @thread["err"]
-    @out.close
-    @err.close       
-    print "\npid #{@pid}\n"
-    
-    begin
-      Process.kill("KILL", @pid)
-    rescue Errno::ESRCH
-      @pid = nil
-    end
-    
     @pid = nil
     
   end
@@ -203,7 +189,7 @@ public
 end
 
 
-vpn = Cmd.new(:vpn, "sudo openvpn --config /home/ubuntu/keys/client.conf")
+vpn = Cmd.new(:vpn, "sudo redcar")
 
 
 
