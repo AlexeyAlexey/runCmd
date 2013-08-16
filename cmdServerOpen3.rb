@@ -6,7 +6,8 @@ require 'pp'
 require 'sys/proctable'
 include Sys
 #Synopsis
-
+Process.daemon
+#$stdout = File.new(path_out, "w")
 class Cmd
   
   @@cmd_info = Hash.new
@@ -215,12 +216,14 @@ loop do
     when "status"
       client.puts vpn.cmdStatus   
     when "shutdown"
-          client.close
+          close = true
     else
         
   end
   #print "Vpn.vpnStatus: ", Vpn.vpnStatus
-  
+  break if close
   #client.puts "endResponse"
   client.close  
 end
+
+out.close
