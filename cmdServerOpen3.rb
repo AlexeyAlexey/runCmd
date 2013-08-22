@@ -220,10 +220,10 @@ loop do
     else
         
   end
-  #print "Vpn.vpnStatus: ", Vpn.vpnStatus
-  break if close
+  #print "Vpn.vpnStatus: ", Vpn.vpnStatus  
   #client.puts "endResponse"
   client.close  
+  break if close
 end
 
 
